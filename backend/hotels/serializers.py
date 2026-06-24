@@ -50,6 +50,13 @@ class HotelListSerializer(serializers.ModelSerializer):
 class HotelDetailSerializer(serializers.ModelSerializer):
     city = serializers.CharField(source="city.name")
     country = serializers.CharField(source="city.country")
+    min_price = serializers.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        read_only=True,
+        allow_null=True,
+    )
+    currency = serializers.SerializerMethodField()
     room_types = RoomTypeSerializer(many=True, read_only=True)
 
     class Meta:
@@ -63,6 +70,12 @@ class HotelDetailSerializer(serializers.ModelSerializer):
             "country",
             "star_rating",
             "review_score",
+            "min_price",
+            "currency",
             "thumbnail_url",
             "room_types",
         ]
+
+    def get_currency(self, hotel):
+        room_type = hotel.room_types.order_by("nightly_price", "id").first()
+        return room_type.currency if room_type else None

@@ -63,6 +63,8 @@ class HotelApiTests(APITestCase):
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["name"], "StayFinder Seoul Central")
+        self.assertEqual(response.data["min_price"], "180000.00")
+        self.assertEqual(response.data["currency"], "KRW")
         self.assertEqual(response.data["room_types"][0]["name"], "Deluxe Double")
         self.assertEqual(response.data["room_types"][0]["max_guests"], 2)
         self.assertEqual(response.data["room_types"][0]["nightly_price"], "180000.00")

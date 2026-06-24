@@ -120,6 +120,8 @@ Response `200`:
   "country": "South Korea",
   "star_rating": 4,
   "review_score": "4.6",
+  "min_price": "180000.00",
+  "currency": "KRW",
   "thumbnail_url": "https://example.com/hotel.jpg",
   "room_types": [
     {
