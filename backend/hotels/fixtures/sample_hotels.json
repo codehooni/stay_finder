@@ -1,0 +1,39 @@
+[
+  {
+    "model": "hotels.city",
+    "pk": 1,
+    "fields": {
+      "name": "Seoul",
+      "country": "South Korea",
+      "slug": "seoul"
+    }
+  },
+  {
+    "model": "hotels.hotel",
+    "pk": 1,
+    "fields": {
+      "city": 1,
+      "name": "StayFinder Seoul Central",
+      "description": "Business-friendly hotel near major transit.",
+      "address": "1 Central Road",
+      "star_rating": 4,
+      "review_score": "4.6",
+      "thumbnail_url": "https://example.com/hotel.jpg",
+      "created_at": "2026-06-24T00:00:00Z",
+      "updated_at": "2026-06-24T00:00:00Z"
+    }
+  },
+  {
+    "model": "hotels.roomtype",
+    "pk": 1,
+    "fields": {
+      "hotel": 1,
+      "name": "Deluxe Double",
+      "description": "Double bed room for two guests.",
+      "max_guests": 2,
+      "total_rooms": 12,
+      "nightly_price": "180000.00",
+      "currency": "KRW"
+    }
+  }
+]

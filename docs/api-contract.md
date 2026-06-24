@@ -78,20 +78,15 @@ Response `200`:
 
 Purpose:
 
-- Search hotels by city, date range, guests, price, amenities, and ordering.
+- List public hotels for the MVP.
+- Optional city filtering is supported by city slug.
+- Date range, guest count, price, amenity, and ordering filters are planned but not implemented in backend MVP 1.
 
 Query params:
 
 | Name | Type | Required | Notes |
 | --- | --- | --- | --- |
-| `city` | string | no | Case-insensitive city search |
-| `check_in` | date | no | `YYYY-MM-DD` |
-| `check_out` | date | no | `YYYY-MM-DD`; must be after `check_in` when both exist |
-| `guests` | integer | no | Filters hotels with at least one matching room type |
-| `min_price` | decimal | no | Minimum nightly room price |
-| `max_price` | decimal | no | Maximum nightly room price |
-| `amenities` | string | no | Comma-separated amenity slugs |
-| `ordering` | string | no | `price`, `-price`, `rating`, `-rating` |
+| `city` | string | no | Case-insensitive city slug, for example `seoul` |
 
 Response `200`:
 
@@ -106,8 +101,7 @@ Response `200`:
     "review_score": "4.6",
     "min_price": "180000.00",
     "currency": "KRW",
-    "thumbnail_url": "https://example.com/hotel.jpg",
-    "amenities": ["wifi", "breakfast", "parking"]
+    "thumbnail_url": "https://example.com/hotel.jpg"
   }
 ]
 ```
@@ -126,19 +120,7 @@ Response `200`:
   "country": "South Korea",
   "star_rating": 4,
   "review_score": "4.6",
-  "images": [
-    {
-      "id": 10,
-      "url": "https://example.com/hotel-lobby.jpg",
-      "alt": "Hotel lobby"
-    }
-  ],
-  "amenities": [
-    {
-      "slug": "wifi",
-      "name": "Wi-Fi"
-    }
-  ],
+  "thumbnail_url": "https://example.com/hotel.jpg",
   "room_types": [
     {
       "id": 100,
@@ -151,6 +133,24 @@ Response `200`:
     }
   ]
 }
+```
+
+### `GET /api/hotels/{hotel_id}/room-types/`
+
+Response `200`:
+
+```json
+[
+  {
+    "id": 100,
+    "name": "Deluxe Double",
+    "description": "Double bed room for two guests.",
+    "max_guests": 2,
+    "total_rooms": 12,
+    "nightly_price": "180000.00",
+    "currency": "KRW"
+  }
+]
 ```
 
 ## Bookings
