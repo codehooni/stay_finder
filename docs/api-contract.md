@@ -10,6 +10,11 @@ Rules:
 
 ## Auth
 
+Booking MVP note:
+
+- Booking endpoints use DRF `IsAuthenticated`.
+- JWT token issuance endpoints below are planned contract targets and are not implemented in the Booking API MVP.
+
 ### `POST /api/auth/register/`
 
 Request:
@@ -157,6 +162,12 @@ Response `200`:
 
 ## Bookings
 
+MVP scope:
+
+- Implemented endpoints are `POST /api/bookings/`, `GET /api/bookings/`, `GET /api/bookings/{booking_id}/`, and `POST /api/bookings/{booking_id}/cancel/`.
+- JWT issuance, frontend booking UI, payment, and admin approve/reject APIs are deferred.
+- Tests authenticate with Django's default `User` model and DRF `force_authenticate`.
+
 Booking status values:
 
 - `pending`
@@ -189,7 +200,7 @@ Server-side validation:
 - `guests <= room_type.max_guests`.
 - Overlapping approved or pending booking count must be lower than `room_type.total_rooms`.
 - `total_price` is calculated by the server.
-- Client-provided `user_id`, `total_price`, and `status` are ignored or rejected.
+- Client-provided `user_id`, `total_price`, and `status` are not trusted. The MVP serializer accepts these keys only to ignore them and keep server ownership explicit.
 
 Response `201`:
 
@@ -221,11 +232,7 @@ Validation error `400`:
 
 ```json
 {
-  "code": "booking_unavailable",
-  "message": "This room type is not available for the selected dates.",
-  "fields": {
-    "check_in": ["Selected dates overlap with existing bookings."]
-  }
+  "room_type": ["This room type is not available for the selected dates."]
 }
 ```
 
@@ -235,7 +242,7 @@ Auth:
 
 - Required.
 - Normal users see their own bookings.
-- Staff users may see all bookings when backend permissions allow it.
+- Staff users see all bookings for later admin workflows.
 
 Response `200`:
 
@@ -243,14 +250,24 @@ Response `200`:
 [
   {
     "id": 500,
-    "hotel_name": "StayFinder Seoul Central",
-    "room_type_name": "Deluxe Double",
+    "hotel": {
+      "id": 1,
+      "name": "StayFinder Seoul Central",
+      "city": "Seoul",
+      "country": "South Korea"
+    },
+    "room_type": {
+      "id": 100,
+      "name": "Deluxe Double"
+    },
     "check_in": "2026-08-01",
     "check_out": "2026-08-04",
     "guests": 2,
+    "nights": 3,
     "total_price": "540000.00",
     "currency": "KRW",
-    "status": "pending"
+    "status": "pending",
+    "created_at": "2026-06-24T12:00:00Z"
   }
 ]
 ```
@@ -285,8 +302,7 @@ Response `200`:
   "total_price": "540000.00",
   "currency": "KRW",
   "status": "pending",
-  "created_at": "2026-06-24T12:00:00Z",
-  "updated_at": "2026-06-24T12:00:00Z"
+  "created_at": "2026-06-24T12:00:00Z"
 }
 ```
 
@@ -302,48 +318,31 @@ Response `200`:
 ```json
 {
   "id": 500,
-  "status": "cancelled"
+  "hotel": {
+    "id": 1,
+    "name": "StayFinder Seoul Central",
+    "city": "Seoul",
+    "country": "South Korea"
+  },
+  "room_type": {
+    "id": 100,
+    "name": "Deluxe Double"
+  },
+  "check_in": "2026-08-01",
+  "check_out": "2026-08-04",
+  "guests": 2,
+  "nights": 3,
+  "total_price": "540000.00",
+  "currency": "KRW",
+  "status": "cancelled",
+  "created_at": "2026-06-24T12:00:00Z"
 }
 ```
 
-### `POST /api/admin/bookings/{booking_id}/approve/`
+Deferred admin endpoints:
 
-Auth:
-
-- Staff only.
-
-Response `200`:
-
-```json
-{
-  "id": 500,
-  "status": "approved"
-}
-```
-
-### `POST /api/admin/bookings/{booking_id}/reject/`
-
-Auth:
-
-- Staff only.
-
-Request:
-
-```json
-{
-  "reason": "Room inventory changed."
-}
-```
-
-Response `200`:
-
-```json
-{
-  "id": 500,
-  "status": "rejected",
-  "rejection_reason": "Room inventory changed."
-}
-```
+- `POST /api/admin/bookings/{booking_id}/approve/`
+- `POST /api/admin/bookings/{booking_id}/reject/`
 
 ## Reviews
 
@@ -415,7 +414,10 @@ Functions:
 - `getMyBookings()`
 - `getBookingDetail(bookingId)`
 - `cancelBooking(bookingId)`
-- `approveBooking(bookingId)`
-- `rejectBooking(bookingId, reason)`
 - `getHotelReviews(hotelId)`
 - `createReview(hotelId, payload)`
+
+Deferred frontend functions:
+
+- `approveBooking(bookingId)`
+- `rejectBooking(bookingId, reason)`
