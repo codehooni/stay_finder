@@ -1,11 +1,14 @@
+import os
 from pathlib import Path
+
+from config.settings_helpers import build_database_config, get_bool_env, get_csv_env
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "stayfinder-local-development-key"
-DEBUG = True
-ALLOWED_HOSTS = ["*"]
+SECRET_KEY = os.environ.get("SECRET_KEY", "stayfinder-local-development-key")
+DEBUG = get_bool_env("DEBUG", default=True)
+ALLOWED_HOSTS = get_csv_env("ALLOWED_HOSTS", default=["*"])
 
 INSTALLED_APPS = [
     "corsheaders",
@@ -53,10 +56,7 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
-    }
+    "default": build_database_config(BASE_DIR)
 }
 
 AUTH_PASSWORD_VALIDATORS = [
@@ -72,6 +72,7 @@ USE_I18N = True
 USE_TZ = True
 
 STATIC_URL = "static/"
+STATIC_ROOT = BASE_DIR / "staticfiles"
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
 REST_FRAMEWORK = {
@@ -81,8 +82,24 @@ REST_FRAMEWORK = {
 }
 
 CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-    "http://localhost:5174",
-    "http://127.0.0.1:5174",
+    *get_csv_env(
+        "CORS_ALLOWED_ORIGINS",
+        default=[
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5174",
+            "https://frontend-omega-lilac-59.vercel.app",
+        ],
+    )
 ]
+
+CSRF_TRUSTED_ORIGINS = get_csv_env("CSRF_TRUSTED_ORIGINS", default=[])
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+SECURE_SSL_REDIRECT = get_bool_env("SECURE_SSL_REDIRECT", default=not DEBUG)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+SECURE_HSTS_SECONDS = int(os.environ.get("SECURE_HSTS_SECONDS", "0"))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_bool_env("SECURE_HSTS_INCLUDE_SUBDOMAINS", default=False)
+SECURE_HSTS_PRELOAD = get_bool_env("SECURE_HSTS_PRELOAD", default=False)

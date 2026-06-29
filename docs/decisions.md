@@ -77,3 +77,25 @@ Consequences:
 
 - Deploy reports must include deployment type, URL, inspect result, smoke result, env var changes, and rollback judgment.
 - `VITE_API_BASE_URL` must be verified for each deploy environment.
+
+## 2026-06-29: Use Render for Django Backend Deployment
+
+Decision:
+
+- Keep the React frontend on Vercel.
+- Deploy the Django REST Framework backend to Render.
+- Use Postgres for the deployed backend database.
+- Keep local SQLite as a short-term development fallback unless local Postgres parity becomes necessary.
+
+Reason:
+
+- Render matches the standard Django deployment model better than Vercel serverless for this project.
+- It keeps the learning focus on Django/DRF, environment variables, migrations, Postgres, and API smoke testing without jumping too early into full server administration.
+- Postgres is a better match for booking transaction logic than SQLite, especially because the backend already uses `transaction.atomic` and `select_for_update`.
+
+Consequences:
+
+- Backend deploy work should target Render Web Service plus Render Postgres.
+- Production settings must read `SECRET_KEY`, `DEBUG`, `ALLOWED_HOSTS`, `CORS_ALLOWED_ORIGINS`, and `DATABASE_URL` from environment variables.
+- Vercel frontend must set `VITE_API_BASE_URL` to the Render backend URL before the final full-stack production smoke test.
+- Django deployment is not complete until migrations, seed data, `/api/hotels/`, room types, CORS, and frontend-to-backend production calls are verified.
